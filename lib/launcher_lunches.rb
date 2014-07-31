@@ -1,34 +1,49 @@
-def most_expensive
+def meal_data
   meal_data = {}
   restaurants.each do |restaurant_name, restaurant_hash|
-    restaurant_name = restaurant_name
-    meal_data[restaurant_name] = {}
+    meal_data[restaurant_name] = { 
+      hours: restaurant_hash[:hours],
+      items: {}
+    }
     restaurants[restaurant_name][:meals].each do |meal_name, meal_hash|
       restaurants[restaurant_name][:meals][meal_name].each do |item_name, item_hash|
         item_name = item_name.to_s.gsub('_', ' ').capitalize
         item_price = item_hash[:price_in_cents]
-        meal_data[restaurant_name][item_name] = item_price
+        meal_data[restaurant_name][:items][item_name] = item_price
       end
     end
   end
+  meal_data
+end
+
+def prices
   prices = []
   meal_data.each do |restaurant_name, hash|
-    prices << hash.values
+    prices << hash[:items].values
   end
+  prices
+end
+
+def most_expensive
   highest_price = prices.flatten.max
   meal_data.each do |restaurant_name, hash|
-    meal_data[restaurant_name].each do |item_name, price|
-      return "#{item_name} from #{restaurant_name}" if meal_data[restaurant_name][item_name] == highest_price
+    meal_data[restaurant_name][:items].each do |item_name, price|
+      return "#{item_name} from #{restaurant_name}" if meal_data[restaurant_name][:items][item_name] == highest_price
     end
   end
 end
 
 def one_of_everything_from(name)
-  "SOLUTION GOES HERE"
+  pennies = meal_data[name][:items].values.reduce(0) { |sum, element| sum + element }
+  "#{pennies/100}.#{pennies%100}".to_f  
 end
 
 def monthly_egg_count
-  "SOLUTION GOES HERE"
+  eggs = 0
+  meal_data.each do |restaurant_name, hash|
+    eggs += hash[:hours] * 16 * 30
+  end
+  eggs
 end
 
 def lactose_free_items
@@ -66,7 +81,7 @@ def restaurants
       }
     },
     "Adam's Veggie Express" => {
-      hours: 9,
+      hours: 10,
       meals: {
         breakfast: {
           asparagus_omlette: {
@@ -91,7 +106,7 @@ def restaurants
       }
     },
     "Eric's Emo Eats" => {
-      hours: 3,
+      hours: 4,
       meals: {
         breakfast: {
           sad_cereal: {
