@@ -3,13 +3,16 @@ def meal_data
   restaurants.each do |restaurant_name, restaurant_hash|
     meal_data[restaurant_name] = { 
       hours: restaurant_hash[:hours],
-      items: {}
+      items: {},
+      ingredients: {}
     }
     restaurants[restaurant_name][:meals].each do |meal_name, meal_hash|
-      restaurants[restaurant_name][:meals][meal_name].each do |item_name, item_hash|
-        item_name = item_name.to_s.gsub('_', ' ').capitalize
+      meal_hash.each do |item_name, item_hash|
+        item_ingredients = item_hash[:ingredients]
+        meal_data[restaurant_name][:ingredients][item_name] = item_ingredients
         item_price = item_hash[:price_in_cents]
-        meal_data[restaurant_name][:items][item_name] = item_price
+        item_name = item_name.to_s.gsub('_', ' ').capitalize
+        meal_data[restaurant_name][:items][item_name]= item_price
       end
     end
   end
@@ -28,13 +31,15 @@ def most_expensive
   highest_price = prices.flatten.max
   meal_data.each do |restaurant_name, hash|
     meal_data[restaurant_name][:items].each do |item_name, price|
-      return "#{item_name} from #{restaurant_name}" if meal_data[restaurant_name][:items][item_name] == highest_price
+      return "#{item_name} from #{restaurant_name}" if price == highest_price
     end
   end
 end
 
 def one_of_everything_from(name)
-  pennies = meal_data[name][:items].values.reduce(0) { |sum, element| sum + element }
+  pennies = meal_data[name][:items].values.reduce(0) do |sum, element|
+    sum + element
+  end
   "#{pennies/100}.#{pennies%100}".to_f  
 end
 
@@ -47,7 +52,16 @@ def monthly_egg_count
 end
 
 def lactose_free_items
-  "SOLUTION GOES HERE"
+  items = []
+  meal_data.each do |restaurant_name, restaurant_hash|
+    meal_data[restaurant_name][:ingredients].each do |item_name, array|
+      items << item_name unless array.any? do |ingr| 
+        ingr == 'cheese' || ingr == 'milk'
+      end
+      puts array
+    end
+  end
+  items
 end
 
 
